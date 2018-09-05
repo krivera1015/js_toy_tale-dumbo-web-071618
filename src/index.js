@@ -4,12 +4,12 @@ const toyCollection = document.querySelector('#toy-collection')
 const addBtn = document.querySelector('#new-toy-btn')
 const toyForm = document.querySelector('.container')
 let addToy = false
-
 // YOUR CODE HERE
-fetch('http://localhost:3000/toys')
-  .then(res => {return res.json()})
+  ToyAdapter.getToys()
   .then((json) => {
     json.forEach(renderToys)
+    console.log(document.querySelector(".like-btn"));
+
   })
 
 addBtn.addEventListener('click', () => {
@@ -26,17 +26,14 @@ addBtn.addEventListener('click', () => {
 const newToyForm = document.querySelector('.add-toy-form')
 newToyForm.addEventListener('submit', (event) => {
   event.preventDefault()
-  const newToyTitle = document.getElementsByName('name')
-  const newToyImage = document.getElementsByName('image')
-  fetch('http://localhost:3000/toys', {
-    method: 'POST',
-    headers: {"Content-type": "application/json"},
-    body: JSON.stringify({ title: newToyTitle.value,
-      image = newToyImage.value
-    })
-  }
-  .then(res => res.json())
-  .then(toys) => {
+  const newToyTitle = document.querySelector("input[name='name']")
+  const newToyImage = document.querySelector("input[name='image']")
+  // console.log(newToyTitle)
+  ToyAdapter.postToys({name: newToyTitle.value,
+    image: newToyImage.value,
+    likes: 0
+  })
+  .then(toys => {
     renderToys(toys)
     newToyTitle.value = ""
     newToyImage.value = ""
@@ -44,8 +41,8 @@ newToyForm.addEventListener('submit', (event) => {
 })
 
 //saving everything into renderingToys
-const renderToys = (toys) => {
-  console.log(toys)
+const renderToys = (toy) => {
+  // console.log(toy)
   //elements created
   const divToyCard = document.createElement('div')
   const cardHeading = document.createElement('h2')
@@ -55,23 +52,33 @@ const renderToys = (toys) => {
 
   //classNames
   divToyCard.className = 'card'
+  divToyCard.dataset.id = toy.id
+  // divToyCard.setAttribute("data-id", toy.id)
   cardImage.className = 'toy-avatar'
   cardButton.className = 'like-btn'
 
   //innertexts
 
-  cardHeading.innerText = toys.name
-  cardImage.src = toys.image
-  cardParagraph.innerText = toys.likes
+  cardHeading.innerText = toy.name
+  cardImage.src = toy.image
+  cardParagraph.innerText = toy.likes
   cardButton.innerText = "Like <3"
-
 
   //appending
   toyCollection.append(divToyCard)
   divToyCard.append(cardHeading, cardImage, cardParagraph, cardButton)
+
+  //event for cardButton
+  cardButton.addEventListener("click", (event) => {
+    console.log(event.target);
+    ToyAdapter.updateToy(toy.id, toy.likes)
+    .then(res => {
+      toy.likes = res.likes
+      cardParagraph.innerText = res.likes
+    })
+  })
 }
 
 
 // OR HERE!
-
 })
